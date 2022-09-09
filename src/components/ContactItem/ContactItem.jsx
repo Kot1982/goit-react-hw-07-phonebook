@@ -1,16 +1,15 @@
 import { Item, Button } from './ContactItem.styled';
-import { useDispatch } from 'react-redux';
-import { deletedContact } from 'redux/contactSlice';
+import { useDeleteContactMutation } from 'redux/contactSlice';
 
-export const ContactItem = ({ name, number, id }) => {
-  const dispatch = useDispatch();
+export const ContactItem = ({ name, phone, id }) => {
+  const [deleteContact] = useDeleteContactMutation();
   return (
     <>
       <Item>
         <p>
-          {name}: {number}
+          {name}: {phone}
         </p>
-        <Button type="button" onClick={() => dispatch(deletedContact(id))}>
+        <Button type="button" onClick={() => deleteContact(id)}>
           Delete
         </Button>
       </Item>

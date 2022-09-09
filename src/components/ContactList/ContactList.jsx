@@ -2,22 +2,18 @@ import PropTypes from 'prop-types';
 import { ContactItem } from 'components/ContactItem/ContactItem';
 import { nanoid } from 'nanoid';
 import { useSelector } from 'react-redux';
-import { getContacts, getFilteredContact } from 'redux/contactSlice';
 
-export const ContactList = () => {
-  const contactItems = useSelector(getContacts);
-  const filteredItems = useSelector(getFilteredContact);
-
-  const currentContacts = contactItems.filter(el =>
-    el.name.toLowerCase().includes(filteredItems.toLowerCase())
+export const ContactList = ({ contacts }) => {
+  const contactItems = useSelector(state => state.filter.value);
+  const normalizedItems = contactItems.toLowerCase();
+  const currentContacts = contacts.filter(el =>
+    el.name.toLowerCase().includes(normalizedItems)
   );
 
   return (
     <ul>
-      {currentContacts.map(({ name, number, id }) => {
-        return (
-          <ContactItem key={nanoid()} name={name} number={number} id={id} />
-        );
+      {currentContacts.map(({ name, phone, id }) => {
+        return <ContactItem key={nanoid()} name={name} phone={phone} id={id} />;
       })}
     </ul>
   );

@@ -1,48 +1,54 @@
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { createSlice } from '@reduxjs/toolkit';
-import { persistReducer } from 'redux-persist';
-import storage from 'redux-persist/lib/storage';
 
-const initialState = {
-  items: [ 
-      { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-      { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-      { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-      { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-    ],
-  filter: '',
-};
+export const contactsApi = createApi({
+  reducerPath: 'contactsApi',
+  baseQuery: fetchBaseQuery({
+    baseUrl: 'https://631b762cfae3df4dcfff6623.mockapi.io/contacts/',
+  }),
+  // tagTypes: ['Contact'],
+  endpoints: builder => ({
+    getContacts: builder.query({
+      query: () => 'contacts',
+      providesTags: ['Contact'],
+    }),
+    getContactById: builder.query({
+      query: contactId => `contacts/${contactId}`,
+      providesTags: ['Contact'],
+    }),
+    deleteContact: builder.mutation({
+      query: contactId => ({
+        url: `contacts/${contactId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Contact'],
+    }),
+    createContact: builder.mutation({
+      query: value => ({
+        url: 'contacts',
+        method: 'POST',
+        body: value,
+      }),
+      invalidatesTags: ['Contact'],
+    }),
+  }),
+});
 
-const contactSlice = createSlice({
-  name: 'contacts',
-  initialState: initialState,
+export const {
+  useGetContactsQuery,
+  useGetContactByIdQuery,
+  useCreateContactMutation,
+  useDeleteContactMutation,
+} = contactsApi;
+
+export const contactsFilterSlice = createSlice({
+  name: 'filter',
+  initialState: {
+    value: '',
+  },
   reducers: {
-    addContact({ items }, action) {
-      items.push(action.payload);
-    },
-    filterContact(state, action) {
-      state.filter = action.payload;
-    },
-    deletedContact(state, action) {
-      state.items = state.items.filter(
-        contact => contact.id !== action.payload
-      );
-    },
+    setFilter: (state, action) => void (state.value = action.payload),
   },
 });
 
-const persistConfig = {
-  key: 'contacts',
-  storage,
-};
-
-export const contactsReducer = persistReducer(
-  persistConfig,
-  contactSlice.reducer
-);
-
-export const { addContact } = contactSlice.actions;
-export const { filterContact } = contactSlice.actions;
-export const { deletedContact } = contactSlice.actions;
-
-export const getContacts = ({ contacts }) => contacts.items;
-export const getFilteredContact = ({ contacts }) => contacts.filter;
+export const { setFilter } = contactsFilterSlice.actions;

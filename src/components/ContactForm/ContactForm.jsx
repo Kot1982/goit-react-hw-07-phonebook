@@ -1,15 +1,17 @@
 import { useState } from 'react';
 import { Form, Label, Button } from './ContactForm.styled';
-import { useDispatch, useSelector } from 'react-redux';
-import { addContact, getContacts } from 'redux/contactSlice';
 import { nanoid } from 'nanoid';
+import {
+  useCreateContactMutation,
+  useGetContactsQuery,
+} from 'redux/contactSlice';
 
 export default function ContactForm() {
   const [name, setName] = useState('');
-  const [number, setNumber] = useState('');
-  const dispatch = useDispatch();
-  const contactItems = useSelector(getContacts);
-
+  const [phone, setNumber] = useState('');
+  const contactItem = useGetContactsQuery();
+  const contactItems = contactItem.data;
+  const [addContact] = useCreateContactMutation();
   const handleChange = event => {
     const { name, value } = event.currentTarget;
 
@@ -17,7 +19,7 @@ export default function ContactForm() {
       case 'name':
         setName(value);
         break;
-      case 'number':
+      case 'phone':
         setNumber(value);
         break;
       default:
@@ -30,13 +32,13 @@ export default function ContactForm() {
     setNumber('');
   };
 
-  const addNewContact = ({ name, number }) => {
+  const addNewContact = ({ name, phone }) => {
     const newContact = {
       name,
-      number,
+      phone,
       id: nanoid(),
     };
-
+    console.log(contactItems);
     if (
       contactItems.find(
         contact => contact.name.toLowerCase() === name.toLowerCase()
@@ -44,12 +46,12 @@ export default function ContactForm() {
     ) {
       return alert(`${name} is already in contacts!`);
     }
-    return dispatch(addContact(newContact));
+    return addContact(newContact);
   };
 
   const handleSubmit = event => {
     event.preventDefault();
-    addNewContact({ name, number });
+    addNewContact({ name, phone });
     reset();
   };
 
@@ -72,9 +74,9 @@ export default function ContactForm() {
         Number
         <input
           type="tel"
-          name="number"
+          name="phone"
           placeholder="Enter phone number"
-          value={number}
+          value={phone}
           onChange={handleChange}
           pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
           title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
